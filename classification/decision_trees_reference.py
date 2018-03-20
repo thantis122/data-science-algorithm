@@ -20,10 +20,6 @@ CART：使用基尼指数的划分准则，通过在每个步骤最大限度降�
 # -*- coding: utf-8 -*-
 
 from numpy import *
-import numpy as np
-import pandas as pd
-from math import log
-import operator
 
 
 # 计算数据集的香农熵
@@ -136,11 +132,11 @@ def chooseBestFeatureToSplit(dataSet, labels):
 
 # 特征若已经划分完，节点下的样本还没有统一取值，则需要进行投票
 def majorityCnt(classList):
-        classCount = {}
+    classCount = {}
 
     for vote in classList:
-            if vote not in classCount.keys():
-                    classCount[vote] = 0
+        if vote not in classCount.keys():
+            classCount[vote] = 0
         classCount[vote] += 1
     return max(classCount)
 
@@ -175,15 +171,12 @@ def createTree(dataSet, labels, data_full, labels_full):
                     myTree[bestFeatLabel][value] = majorityCnt(classList)
     return myTree
 
-
-
-
-df=pd.read_csv('watermelon_4_3.csv')
-data=df.values[:,1:].tolist()
-data_full=data[:]
-labels=df.columns.values[1:-1].tolist()
-labels_full=labels[:]
-myTree=createTree(data,labels,data_full,labels_full)
+df = pd.read_csv('watermelon_4_3.csv')
+data = df.values[:, 1:].tolist()
+data_full = data[:]
+labels = df.columns.values[1:-1].tolist()
+labels_full = labels[:]
+myTree = createTree(data, labels, data_full, labels_full)
 
 import matplotlib.pyplot as plt
 
@@ -269,8 +262,6 @@ def createPlot(inTree):
 
 createPlot(myTree)
 
-
-
 '''
 autre modele de ID3 par Python
 
@@ -279,11 +270,14 @@ autre modele de ID3 par Python
 from math import log
 import operator
 import pickle
+
 '''
 输入：原始数据集、子数据集（最后一列为类别标签，其他为特征列）
 功能：计算原始数据集、子数据集（某一特征取值下对应的数据集）的香农熵
 输出：float型数值（数据集的熵值）
 '''
+
+
 def calcShannonEnt(dataset):
     numSamples = len(dataset)
     labelCounts = {}
@@ -294,55 +288,65 @@ def calcShannonEnt(dataset):
         labelCounts[currentLabel] += 1
     entropy = 0.0
     for key in labelCounts:
-        property = float(labelCounts[key])/numSamples
-        entropy -= property * log(property,2)
+        property = float(labelCounts[key]) / numSamples
+        entropy -= property * log(property, 2)
     return entropy
+
 
 '''
 输入：无
 功能：封装原始数据集
 输出：数据集、特征标签
 '''
+
+
 def creatDataSet():
-    dataset = [[1,1,'yes'],[1,1,'yes'],[1,0,'no'],[0,1,'no'],[0,0,'no']]
-    labels = ['no surfacing','flippers']
-    return dataset,labels
+    dataset = [[1, 1, 'yes'], [1, 1, 'yes'], [1, 0, 'no'], [0, 1, 'no'], [0, 0, 'no']]
+    labels = ['no surfacing', 'flippers']
+    return dataset, labels
+
 
 '''
 输入：数据集、数据集中的某一特征所在列的索引、该特征某一可能取值（例如，（原始数据集、0,1 ））
 功能：取出在该特征取值下的子数据集（子集不包含该特征）
 输出：子数据集
 '''
-def getSubDataset(dataset,colIndex,value):
-    subDataset = [] #用于存储子数据集
+
+
+def getSubDataset(dataset, colIndex, value):
+    subDataset = []  # 用于存储子数据集
     for rowVector in dataset:
         if rowVector[colIndex] == value:
-            #下边两句实现抽取除第colIndex列特征的其他特征取值
+            # 下边两句实现抽取除第colIndex列特征的其他特征取值
             subRowVector = rowVector[:colIndex]
-            subRowVector.extend(rowVector[colIndex+1:])
-            #将抽取的特征行添加到特征子数据集中
+            subRowVector.extend(rowVector[colIndex + 1:])
+            # 将抽取的特征行添加到特征子数据集中
             subDataset.append(subRowVector)
     return subDataset
+
 
 '''
 输入：数据集
 功能：选择最优的特征，以便得到最优的子数据集（可简单的理解为特征在决策树中的先后顺序）
 输出：最优特征在数据集中的列索引
 '''
+
+
 def BestFeatToGetSubdataset(dataset):
-    #下边这句实现：除去最后一列类别标签列剩余的列数即为特征个数
+    # 下边这句实现：除去最后一列类别标签列剩余的列数即为特征个数
     numFeature = len(dataset[0]) - 1
     baseEntropy = calcShannonEnt(dataset)
-    bestInfoGain = 0.0; bestFeature = -1
-    for i in range(numFeature):#i表示该函数传入的数据集中每个特征
+    bestInfoGain = 0.0;
+    bestFeature = -1
+    for i in range(numFeature):  # i表示该函数传入的数据集中每个特征
         # 下边这句实现抽取特征i在数据集中的所有取值
         feat_i_values = [example[i] for example in dataset]
         uniqueValues = set(feat_i_values)
         feat_i_entropy = 0.0
         for value in uniqueValues:
-            subDataset = getSubDataset(dataset,i,value)
-            #下边这句计算pi
-            prob_i = len(subDataset)/float(len(dataset))
+            subDataset = getSubDataset(dataset, i, value)
+            # 下边这句计算pi
+            prob_i = len(subDataset) / float(len(dataset))
             feat_i_entropy += prob_i * calcShannonEnt(subDataset)
         infoGain_i = baseEntropy - feat_i_entropy
         if (infoGain_i > bestInfoGain):
@@ -350,11 +354,14 @@ def BestFeatToGetSubdataset(dataset):
             bestFeature = i
     return bestFeature
 
+
 '''
 输入：子数据集的类别标签列
 功能：找出该数据集个数最多的类别
 输出：子数据集中个数最多的类别标签
 '''
+
+
 def mostClass(ClassList):
     classCount = {}
     for class_i in ClassList:
@@ -362,54 +369,61 @@ def mostClass(ClassList):
             classCount[class_i] = 0
         classCount[class_i] += 1
     sortedClassCount = sorted(classCount.iteritems(),
-    key=operator.itemgetter(1),reverse = True)
+                              key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
+
 
 '''
 输入：数据集，特征标签
 功能：创建决策树（直观的理解就是利用上述函数创建一个树形结构）
 输出：决策树（用嵌套的字典表示）
 '''
-def creatTree(dataset,labels):
+
+
+def creatTree(dataset, labels):
     classList = [example[-1] for example in dataset]
-    #判断传入的dataset中是否只有一种类别，是，返回该类别
+    # 判断传入的dataset中是否只有一种类别，是，返回该类别
     if classList.count(classList[0]) == len(classList):
         return classList[0]
-    #判断是否遍历完所有的特征,是，返回个数最多的类别
+    # 判断是否遍历完所有的特征,是，返回个数最多的类别
     if len(dataset[0]) == 1:
         return mostClass(classList)
-    #找出最好的特征划分数据集
+    # 找出最好的特征划分数据集
     bestFeat = BestFeatToGetSubdataset(dataset)
-    #找出最好特征对应的标签
+    # 找出最好特征对应的标签
     bestFeatLabel = labels[bestFeat]
-    #搭建树结构
-    myTree = {bestFeatLabel:{}}
+    # 搭建树结构
+    myTree = {bestFeatLabel: {}}
     del (labels[bestFeat])
-    #抽取最好特征的可能取值集合
+    # 抽取最好特征的可能取值集合
     bestFeatValues = [example[bestFeat] for example in dataset]
     uniqueBestFeatValues = set(bestFeatValues)
     for value in uniqueBestFeatValues:
-        #取出在该最好特征的value取值下的子数据集和子标签列表
-        subDataset = getSubDataset(dataset,bestFeat,value)
+        # 取出在该最好特征的value取值下的子数据集和子标签列表
+        subDataset = getSubDataset(dataset, bestFeat, value)
         subLabels = labels[:]
-        #递归创建子树
-        myTree[bestFeatLabel][value] = creatTree(subDataset,subLabels)
+        # 递归创建子树
+        myTree[bestFeatLabel][value] = creatTree(subDataset, subLabels)
     return myTree
+
 
 '''
 输入：测试特征数据
 功能：调用训练决策树对测试数据打上类别标签
 输出：测试特征数据所属类别
 '''
-def classify(inputTree,featlabels,testFeatValue):
+
+
+def classify(inputTree, featlabels, testFeatValue):
     firstStr = inputTree.keys()[0]
     secondDict = inputTree[firstStr]
     featIndex = featlabels.index(firstStr)
     for firstStr_value in secondDict.keys():
         if testFeatValue[featIndex] == firstStr_value:
             if type(secondDict[firstStr_value]).__name__ == 'dict':
-                classLabel = classify(secondDict[firstStr_value],featlabels,testFeatValue)
-            else: classLabel = secondDict[firstStr_value]
+                classLabel = classify(secondDict[firstStr_value], featlabels, testFeatValue)
+            else:
+                classLabel = secondDict[firstStr_value]
     return classLabel
 
 
@@ -418,28 +432,23 @@ def classify(inputTree,featlabels,testFeatValue):
 功能：训练树的存储
 输出：
 '''
-def storeTree(trainTree,filename):
 
-    fw = open(filename,'w')
-    pickle.dump(trainTree,fw)
+
+def storeTree(trainTree, filename):
+    fw = open(filename, 'w')
+    pickle.dump(trainTree, fw)
     fw.close()
-def grabTree(filename):
 
+
+def grabTree(filename):
     fr = open(filename)
     return pickle.load(fr)
 
 
 if __name__ == '__main__':
-    dataset,labels = creatDataSet()
-    storelabels = labels[:]#复制label
-    trainTree = creatTree(dataset,labels)
-    classlabel = classify(trainTree,storelabels,[0,1])
-    print classlabel
-
-
-
-
-
-
-
-
+    dataset, labels = creatDataSet()
+    storelabels = labels[:]  # 复制label
+    trainTree = creatTree(dataset, labels)
+    classlabel = classify(trainTree, storelabels, [0, 1])
+    print
+    classlabel
