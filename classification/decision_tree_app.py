@@ -37,10 +37,45 @@ graph
 
 '''
 another complex dataframe
+Titanic
 
 '''
 
+#import the train dataset
+data_titanic_train = pd.read_csv('train.csv', sep=',', encoding = 'utf-8')
 
+
+def feature_treat(df_titanic):
+    df = df_titanic
+    df.set_index('PassengerId')
+    
+    
+    
+    return df
+
+dfvv = feature_treat()
+
+
+
+
+
+
+
+#import the test dataset
+data_titanic_test = pd.read_csv('test.csv', sep=',', encoding = 'utf-8')
+
+
+
+
+def fib3(n):
+    a, b = 0, 1
+    for i in range(n):
+        a, b = b, a+b
+    return a
+ 
+for i in range(10):
+    print(fib3(i))
+    
 
 
 
